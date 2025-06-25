@@ -1,0 +1,95 @@
+# 다중 서비스 복합 장애 시나리오
+# User Service: HTTP 500 오류 + Movie Service: 지연 + Booking Service: 차단
+
+# User Service VirtualService (30% HTTP 500 오류)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: user-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - user-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 100
+  - fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 30.0
+    route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 70
+    - destination:
+        host: user-service
+        subset: ctx2
+      weight: 30
+---
+# Movie Service VirtualService (CTX2에 3초 지연)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: movie-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - movie-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 100
+  - fault:
+      delay:
+        percentage:
+          value: 30.0
+        fixedDelay: 3s
+    route:
+    - destination:
+        host: movie-service
+        subset: ctx1
+      weight: 30
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 70
+---
+# Booking Service VirtualService (CTX2 완전 차단)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: booking-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - booking-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 100
+  - route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 100

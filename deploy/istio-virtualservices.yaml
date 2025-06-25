@@ -1,0 +1,86 @@
+# User Service VirtualService - 70% ctx1, 30% ctx2
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: user-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - user-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: user-service
+        subset: ctx2
+      weight: 100
+  - route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 70
+    - destination:
+        host: user-service
+        subset: ctx2
+      weight: 30
+---
+# Movie Service VirtualService - 30% ctx1, 70% ctx2
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: movie-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - movie-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: movie-service
+        subset: ctx1
+      weight: 100
+  - route:
+    - destination:
+        host: movie-service
+        subset: ctx1
+      weight: 30
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 70
+---
+# Booking Service VirtualService - 50% ctx1, 50% ctx2
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: booking-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - booking-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 100
+  - route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 50
+    - destination:
+        host: booking-service
+        subset: ctx2
+      weight: 50

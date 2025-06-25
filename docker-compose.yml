@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  redis:
+    image: "redis:alpine"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - theater-net
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./ui:/app/ui
+    depends_on:
+      - user-service
+      - movie-service
+      - booking-service
+    networks:
+      - theater-net
+
+  user-service:
+    build:
+      context: ./services/user-service
+    container_name: user-service
+    expose:
+      - "8081"
+    depends_on:
+      - redis
+    networks:
+      - theater-net
+
+  movie-service:
+    build:
+      context: ./services/movie-service
+    container_name: movie-service
+    expose:
+      - "8082"
+    depends_on:
+      - redis
+    networks:
+      - theater-net
+
+  booking-service:
+    build:
+      context: ./services/booking-service
+    container_name: booking-service
+    expose:
+      - "8083"
+    depends_on:
+      - redis
+    networks:
+      - theater-net
+
+networks:
+  theater-net:
+    driver: bridge

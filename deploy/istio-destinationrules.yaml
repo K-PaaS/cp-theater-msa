@@ -1,0 +1,74 @@
+# User Service DestinationRule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: user-service-dr
+  namespace: theater-msa
+spec:
+  host: user-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+  subsets:
+  - name: ctx1
+    labels:
+      cluster: ctx1
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+  - name: ctx2
+    labels:
+      cluster: ctx2
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+---
+# Movie Service DestinationRule  
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: movie-service-dr
+  namespace: theater-msa
+spec:
+  host: movie-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+  subsets:
+  - name: ctx1
+    labels:
+      cluster: ctx1
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+  - name: ctx2
+    labels:
+      cluster: ctx2
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+---
+# Booking Service DestinationRule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: booking-service-dr
+  namespace: theater-msa
+spec:
+  host: booking-service
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+  subsets:
+  - name: ctx1
+    labels:
+      cluster: ctx1
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+  - name: ctx2
+    labels:
+      cluster: ctx2
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN

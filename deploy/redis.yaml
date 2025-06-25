@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: theater-msa
+  labels:
+    app: redis
+    tier: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+        tier: database
+    spec:
+      containers:
+      - name: redis
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: redis-init
+          mountPath: /docker-entrypoint-initdb.d
+        command: ["sh", "-c"]
+        args:
+        - |
+          redis-server --daemonize yes
+          sleep 3
+          echo "Loading initial user data..."
+          redis-cli SET "user:1" '{"id":"1","name":"홍길동","email":"hong@example.com"}'
+          redis-cli SET "user:2" '{"id":"2","name":"이순신","email":"sunshin@example.com"}'
+          redis-cli SET "user:3" '{"id":"3","name":"김유신","email":"yusin@example.com"}'
+          echo "Loading initial movie data..."
+          redis-cli SET "movie:1" '{"id":"1","title":"어벤져스","genre":"액션","year":2019}'
+          redis-cli SET "movie:2" '{"id":"2","title":"겨울왕국","genre":"애니메이션","year":2019}'
+          redis-cli SET "movie:3" '{"id":"3","title":"기생충","genre":"드라마","year":2019}'
+          echo "Initial data loaded successfully"
+          pkill redis-server
+          sleep 1
+          redis-server
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+      - name: redis-init
+        emptyDir: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cluster-name
+                operator: In
+                values:
+                - ctx2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: theater-msa
+  labels:
+    app: redis
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: redis

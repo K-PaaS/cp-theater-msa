@@ -1,0 +1,108 @@
+# User Service HTTP 500 오류 장애 시나리오
+# 30% 확률로 HTTP 500 오류 주입
+
+# User Service VirtualService (오류 장애 포함)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: user-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - user-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 100
+  - match:
+    - headers:
+        x-circuit-test:
+          exact: "true"
+    fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 90.0
+    route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 100
+  - fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 30.0
+    route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 70
+    - destination:
+        host: user-service
+        subset: ctx2
+      weight: 30
+---
+# Movie Service VirtualService (기본값 유지)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: movie-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - movie-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 100
+  - route:
+    - destination:
+        host: movie-service
+        subset: ctx1
+      weight: 30
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 70
+---
+# Booking Service VirtualService (기본값 유지)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: booking-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - booking-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 100
+  - route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 50
+    - destination:
+        host: booking-service
+        subset: ctx2
+      weight: 50

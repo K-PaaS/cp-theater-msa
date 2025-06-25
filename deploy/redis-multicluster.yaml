@@ -1,0 +1,95 @@
+# Redis Service for CTX1 (proxy to CTX2)
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: theater-msa
+  labels:
+    app: redis
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: redis-proxy
+---
+# Redis Proxy Deployment for CTX1 (redirects to CTX2)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-proxy
+  namespace: theater-msa
+  labels:
+    app: redis-proxy
+    tier: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-proxy
+  template:
+    metadata:
+      labels:
+        app: redis-proxy
+        tier: database
+    spec:
+      containers:
+      - name: redis-proxy
+        image: alpine/socat:latest
+        command: 
+        - socat
+        - tcp-listen:6379,fork,reuseaddr
+        - tcp-connect:redis.theater-msa.svc.cluster.local:6379
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "25m"
+          limits:
+            memory: "64Mi"
+            cpu: "50m"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cluster-name
+                operator: In
+                values:
+                - ctx1
+---
+# Redis VirtualService for multi-cluster routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: redis-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - redis
+  tcp:
+  - route:
+    - destination:
+        host: redis
+        subset: ctx2
+      weight: 100
+---
+# Redis DestinationRule for multi-cluster subsets
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: redis-dr
+  namespace: theater-msa
+spec:
+  host: redis
+  subsets:
+  - name: ctx1
+    labels:
+      cluster-name: ctx1
+  - name: ctx2
+    labels:
+      cluster-name: ctx2

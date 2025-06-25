@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: theater-msa
+  labels:
+    app: api-gateway
+    version: v1
+    cluster: ctx1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        version: v1
+        cluster: ctx1
+    spec:
+      serviceAccountName: theater-msa-sa
+      nodeSelector:
+        cluster-name: ctx1
+      containers:
+      - name: api-gateway
+        image: theater-msa/api-gateway:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: USER_SERVICE_CTX1_WEIGHT
+          value: "70"
+        - name: USER_SERVICE_CTX2_WEIGHT
+          value: "30"
+        - name: MOVIE_SERVICE_CTX1_WEIGHT
+          value: "30"
+        - name: MOVIE_SERVICE_CTX2_WEIGHT
+          value: "70"
+        - name: BOOKING_SERVICE_CTX1_WEIGHT
+          value: "50"
+        - name: BOOKING_SERVICE_CTX2_WEIGHT
+          value: "50"
+        volumeMounts:
+        - name: ui-files
+          mountPath: /app/ui
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: ui-files
+        configMap:
+          name: ui-files
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: theater-msa
+  labels:
+    app: api-gateway
+    service: api-gateway
+spec:
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: api-gateway

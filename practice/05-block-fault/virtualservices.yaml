@@ -1,0 +1,85 @@
+# Booking Service CTX2 클러스터 차단 시나리오
+# 모든 트래픽을 CTX1으로만 라우팅
+
+# User Service VirtualService (기본값 유지)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: user-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - user-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 100
+  - route:
+    - destination:
+        host: user-service
+        subset: ctx1
+      weight: 70
+    - destination:
+        host: user-service
+        subset: ctx2
+      weight: 30
+---
+# Movie Service VirtualService (기본값 유지)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: movie-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - movie-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 100
+  - route:
+    - destination:
+        host: movie-service
+        subset: ctx1
+      weight: 30
+    - destination:
+        host: movie-service
+        subset: ctx2
+      weight: 70
+---
+# Booking Service VirtualService (CTX2 차단 - 모든 트래픽 CTX1으로)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: booking-service-vs
+  namespace: theater-msa
+spec:
+  hosts:
+  - booking-service
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 100
+  - route:
+    - destination:
+        host: booking-service
+        subset: ctx1
+      weight: 100

@@ -1,0 +1,21 @@
+# External VirtualService for Theater MSA
+# Note: This is a template file. The actual domain should be replaced during deployment.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: theater-msa
+  namespace: istio-system
+spec:
+  hosts:
+  - theater.DOMAIN_PLACEHOLDER
+  gateways:
+  - cp-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: api-gateway.theater-msa.svc.cluster.local
+        port:
+          number: 8080

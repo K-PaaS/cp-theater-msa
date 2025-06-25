@@ -1,0 +1,60 @@
+# CTX2 전용 Movie Service 배포
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-service-ctx2
+  namespace: theater-msa
+  labels:
+    app: movie-service
+    tier: backend
+    cluster: ctx2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movie-service
+      cluster: ctx2
+  template:
+    metadata:
+      labels:
+        app: movie-service
+        tier: backend
+        cluster: ctx2
+    spec:
+      serviceAccountName: theater-msa-sa
+      containers:
+      - name: movie-service
+        image: theater-msa/movie-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+        env:
+        - name: CLUSTER_NAME
+          value: "ctx2"
+        envFrom:
+        - configMapRef:
+            name: theater-config
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-service
+  namespace: theater-msa
+  labels:
+    app: movie-service
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8082
+    targetPort: 8082
+    protocol: TCP
+  selector:
+    app: movie-service

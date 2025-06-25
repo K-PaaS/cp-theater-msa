@@ -1,0 +1,1372 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ui-files
+  namespace: theater-msa
+  labels:
+    app: theater-msa
+    component: ui
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>K-PaaS 영화관 MSA 샘플 - 클러스터 간 트래픽 분산 시각화</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎬 K-PaaS 영화관 MSA 샘플</h1>
+            <p class="subtitle">멀티클라우드 MSA 데모 애플리케이션 - 트래픽 분산 시각화</p>
+            
+            <div class="data-sections">
+                <div class="data-section">
+                    <h2>👥 사용자 목록</h2>
+                    <div class="traffic-visualization">
+                        <div class="traffic-display">
+                            <div class="cluster-grid">
+                                <div class="cluster-row">
+                                    <div class="cluster-info">
+                                        <span class="cluster-label">CTX1</span>
+                                        <div class="traffic-lights" id="ctx1-lights">
+                                            <!-- 16개 신호등이 JavaScript로 동적 생성됩니다 -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cluster-row">
+                                    <div class="cluster-info">
+                                        <span class="cluster-label">CTX2</span>
+                                        <div class="traffic-lights" id="ctx2-lights">
+                                            <!-- 16개 신호등이 JavaScript로 동적 생성됩니다 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="traffic-stats">
+                                <div class="stat-card vs-config">
+                                    <div class="stat-content">
+                                        <div class="stat-label">트래픽 설정</div>
+                                        <div class="stat-value" id="vs-ratio">70% : 30%</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card actual-ratio">
+                                    <div class="stat-content">
+                                        <div class="stat-label">실제 트래픽 비율</div>
+                                        <div class="stat-value" id="actual-ratio">0% : 0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="loadUsers()">새로고침</button>
+                    <div id="users">로딩 중...</div>
+                </div>
+                
+                <div class="data-section">
+                    <h2>🎭 영화 목록</h2>
+                    <div class="traffic-visualization">
+                        <div class="traffic-display">
+                            <div class="cluster-grid">
+                                <div class="cluster-row">
+                                    <div class="cluster-info">
+                                        <span class="cluster-label">CTX1</span>
+                                        <div class="traffic-lights" id="movie-ctx1-lights">
+                                            <!-- 16개 신호등이 JavaScript로 동적 생성됩니다 -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cluster-row">
+                                    <div class="cluster-info">
+                                        <span class="cluster-label">CTX2</span>
+                                        <div class="traffic-lights" id="movie-ctx2-lights">
+                                            <!-- 16개 신호등이 JavaScript로 동적 생성됩니다 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="traffic-stats">
+                                <div class="stat-card vs-config">
+                                    <div class="stat-content">
+                                        <div class="stat-label">트래픽 설정</div>
+                                        <div class="stat-value" id="movie-vs-ratio">30% : 70%</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card actual-ratio">
+                                    <div class="stat-content">
+                                        <div class="stat-label">실제 트래픽 비율</div>
+                                        <div class="stat-value" id="movie-actual-ratio">0% : 0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="loadMovies()">새로고침</button>
+                    <div id="movies">로딩 중...</div>
+                </div>
+                
+                <div class="data-section">
+                    <h2>🎫 예약 내역</h2>
+                    <div class="traffic-visualization">
+                        <div class="traffic-display">
+                            <div class="cluster-grid">
+                                <div class="cluster-row">
+                                    <div class="cluster-info">
+                                        <span class="cluster-label">CTX1</span>
+                                        <div class="traffic-lights" id="booking-ctx1-lights">
+                                            <!-- 16개 신호등이 JavaScript로 동적 생성됩니다 -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cluster-row">
+                                    <div class="cluster-info">
+                                        <span class="cluster-label">CTX2</span>
+                                        <div class="traffic-lights" id="booking-ctx2-lights">
+                                            <!-- 16개 신호등이 JavaScript로 동적 생성됩니다 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="traffic-stats">
+                                <div class="stat-card vs-config">
+                                    <div class="stat-content">
+                                        <div class="stat-label">트래픽 설정</div>
+                                        <div class="stat-value" id="booking-vs-ratio">50% : 50%</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card actual-ratio">
+                                    <div class="stat-content">
+                                        <div class="stat-label">실제 트래픽 비율</div>
+                                        <div class="stat-value" id="booking-actual-ratio">0% : 0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="loadBookings()">새로고침</button>
+                    <div id="bookings">로딩 중...</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>☁️ 멀티클라우드 배포 현황</h2>
+                <button onclick="loadDeploymentStatus()">배포 상태 새로고침</button>
+                <div id="deployment-status">로딩 중...</div>
+            </div>
+        </div>
+        
+        <script src="script.js"></script>
+    </body>
+    </html>
+  style.css: |
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #2d3748;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #2d3748;
+        font-size: 2.2em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #718096;
+        font-size: 1.1em;
+        margin-bottom: 30px;
+        font-weight: 300;
+    }
+
+    /* 데이터 섹션들을 3열로 배치 */
+    .data-sections {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .data-section {
+        padding: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f7fafc;
+        min-height: 400px;
+    }
+
+    .data-section h2 {
+        color: #2d3748;
+        border-bottom: 2px solid #4299e1;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+    }
+
+    .data-section button {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: 500;
+        margin-bottom: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .data-section button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+    }
+
+    .traffic-indicator {
+        background: #e2e8f0;
+        border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 10px;
+        font-size: 0.8em;
+    }
+
+    .traffic-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .istio-config {
+        flex: 1;
+    }
+
+    .config-item {
+        background: #4299e1;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        font-size: 0.75em;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .config-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* 트래픽 시각화 스타일 */
+    .traffic-visualization {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 1px solid #cbd5e0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .traffic-display {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .cluster-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 0 0 auto;
+    }
+
+    .cluster-row {
+        display: flex;
+        align-items: center;
+    }
+
+    .cluster-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+    }
+
+    .cluster-label {
+        font-weight: 700;
+        font-size: 0.9em;
+        color: #2d3748;
+        min-width: 45px;
+        padding: 4px 8px;
+        background: #e2e8f0;
+        border-radius: 6px;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+    }
+
+    .traffic-lights {
+        display: flex;
+        gap: 2px;
+        flex-wrap: nowrap;
+    }
+
+    .traffic-light {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        border: 1px solid #cbd5e0;
+        background: #f7fafc;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .traffic-light.green {
+        background: radial-gradient(circle, #48bb78 0%, #38a169 100%);
+        border-color: #2f855a;
+        box-shadow: 0 0 5px rgba(72, 187, 120, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .traffic-light.red {
+        background: radial-gradient(circle, #f56565 0%, #e53e3e 100%);
+        border-color: #c53030;
+        box-shadow: 0 0 5px rgba(245, 101, 101, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .traffic-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        padding: 6px 10px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-left: 3px solid #4299e1;
+        height: 44px;
+        min-width: 120px;
+    }
+
+    .stat-card.vs-config {
+        border-left-color: #4299e1;
+    }
+
+    .stat-card.actual-ratio {
+        border-left-color: #38a169;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-label {
+        font-size: 0.7em;
+        font-weight: 600;
+        color: #718096;
+        margin-bottom: 1px;
+    }
+
+    .stat-value {
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #2d3748;
+        font-family: 'Courier New', monospace;
+        white-space: nowrap;
+    }
+
+    /* 반응형 디자인 개선 */
+    @media (max-width: 768px) {
+        .traffic-display {
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .cluster-info {
+            min-width: auto;
+            width: 100%;
+        }
+        
+        .traffic-lights {
+            max-width: none;
+        }
+        
+        .stat-card {
+            padding: 10px 12px;
+        }
+        
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 1.2em;
+        }
+    }
+
+    .data-section .data-item {
+        background: white;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 6px;
+        border-left: 3px solid #4299e1;
+        font-size: 0.9em;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .data-section .data-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .user-item, .movie-item, .booking-item {
+        background: white;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 6px;
+        border-left: 3px solid #4299e1;
+        font-size: 0.9em;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .user-item:hover, .movie-item:hover, .booking-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .user-name, .movie-title, .booking-info {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 3px;
+    }
+
+    .user-email, .movie-details, .booking-details {
+        color: #718096;
+        font-size: 0.85em;
+    }
+
+    .section {
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f7fafc;
+    }
+
+    .section h2 {
+        color: #2d3748;
+        border-bottom: 2px solid #4299e1;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+    }
+
+    .section button {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: 500;
+        margin-bottom: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .section button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+    }
+
+    .deployment-item {
+        background: white;
+        padding: 10px;
+        margin: 6px 0;
+        border-radius: 6px;
+        border-left: 3px solid #4299e1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9em;
+    }
+
+    .deployment-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .deployment-icon {
+        font-size: 1.1em;
+    }
+
+    .deployment-status {
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 0.75em;
+        font-weight: 500;
+    }
+
+    .status-running {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-failed {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-unknown {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 968px) {
+        .data-sections {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .container {
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 1.8em;
+        }
+        
+        .data-section {
+            min-height: auto;
+            padding: 12px;
+        }
+        
+        .traffic-lights-horizontal {
+            gap: 2px;
+        }
+        
+        .light {
+            width: 10px;
+            height: 10px;
+        }
+    }
+
+    @media (max-width: 1200px) and (min-width: 969px) {
+        .data-sections {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* 애니메이션 효과 */
+    .data-section {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 배포 현황 스타일 */
+    .deployment-overview {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .cluster-deployment {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 1px solid #cbd5e0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .cluster-deployment.static-data {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        opacity: 0.85;
+    }
+
+    .cluster-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .cluster-header h3 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+
+    .cluster-status {
+        background: #48bb78;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 500;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 15px;
+    }
+
+    .service-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .service-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-card.status-running {
+        border-left: 4px solid #48bb78;
+    }
+
+    .service-card.status-pending {
+        border-left: 4px solid #ed8936;
+    }
+
+    .service-card.status-failed {
+        border-left: 4px solid #f56565;
+    }
+
+    .service-card.status-not-ready {
+        border-left: 4px solid #ecc94b;
+    }
+
+    .service-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .service-icon {
+        font-size: 1.8em;
+        width: 40px;
+        text-align: center;
+    }
+
+    .service-name {
+        flex: 1;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 1.1em;
+    }
+
+    .service-status {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .service-status.status-running {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+
+    .service-status.status-pending {
+        background: #fbd38d;
+        color: #744210;
+    }
+
+    .service-status.status-failed {
+        background: #fed7d7;
+        color: #742a2a;
+    }
+
+    .service-status.status-not-ready {
+        background: #faf089;
+        color: #744210;
+    }
+
+    .service-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .detail-label {
+        font-size: 0.8em;
+        color: #718096;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        font-size: 0.9em;
+        color: #2d3748;
+        font-weight: 500;
+        word-break: break-all;
+    }
+
+    .error-message {
+        color: #e53e3e;
+        text-align: center;
+        padding: 20px;
+        background: #fed7d7;
+        border-radius: 8px;
+        border: 1px solid #feb2b2;
+        margin-top: 15px;
+    }
+  script.js: |
+    // 전역 변수
+    let currentUsers = [];
+    let currentMovies = [];
+    let currentBookings = [];
+    
+    // 트래픽 기록 (서비스별로 관리)
+    let userTrafficHistory = []; // 최대 100개의 트래픽 기록
+    let userLightHistory = []; // 최대 16개의 신호등 기록
+    let movieTrafficHistory = []; // 최대 100개의 트래픽 기록
+    let movieLightHistory = []; // 최대 16개의 신호등 기록
+    let bookingTrafficHistory = []; // 최대 100개의 트래픽 기록
+    let bookingLightHistory = []; // 최대 16개의 신호등 기록
+    
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTrafficLights();
+        loadVirtualServiceConfig();
+        // Redis에서 이미 초기 데이터를 제공하므로 initializeData() 호출 제거
+        loadUsers();
+        loadMovies();
+        loadBookings();
+        loadDeploymentStatus();
+        startPeriodicUpdates();
+    });
+
+    // 신호등 초기화
+    function initializeTrafficLights() {
+        // 사용자 서비스 신호등
+        const ctx1Container = document.getElementById('ctx1-lights');
+        const ctx2Container = document.getElementById('ctx2-lights');
+        
+        // 영화 서비스 신호등
+        const movieCtx1Container = document.getElementById('movie-ctx1-lights');
+        const movieCtx2Container = document.getElementById('movie-ctx2-lights');
+        
+        // 예약 서비스 신호등
+        const bookingCtx1Container = document.getElementById('booking-ctx1-lights');
+        const bookingCtx2Container = document.getElementById('booking-ctx2-lights');
+        
+        // 16개의 신호등 생성 (사용자 서비스)
+        for (let i = 0; i < 16; i++) {
+            const light1 = document.createElement('div');
+            light1.className = 'traffic-light';
+            light1.id = `ctx1-light-${i}`;
+            ctx1Container.appendChild(light1);
+            
+            const light2 = document.createElement('div');
+            light2.className = 'traffic-light';
+            light2.id = `ctx2-light-${i}`;
+            ctx2Container.appendChild(light2);
+        }
+        
+        // 16개의 신호등 생성 (영화 서비스)
+        for (let i = 0; i < 16; i++) {
+            const light1 = document.createElement('div');
+            light1.className = 'traffic-light';
+            light1.id = `movie-ctx1-light-${i}`;
+            movieCtx1Container.appendChild(light1);
+            
+            const light2 = document.createElement('div');
+            light2.className = 'traffic-light';
+            light2.id = `movie-ctx2-light-${i}`;
+            movieCtx2Container.appendChild(light2);
+        }
+        
+        // 16개의 신호등 생성 (예약 서비스)
+        for (let i = 0; i < 16; i++) {
+            const light1 = document.createElement('div');
+            light1.className = 'traffic-light';
+            light1.id = `booking-ctx1-light-${i}`;
+            bookingCtx1Container.appendChild(light1);
+            
+            const light2 = document.createElement('div');
+            light2.className = 'traffic-light';
+            light2.id = `booking-ctx2-light-${i}`;
+            bookingCtx2Container.appendChild(light2);
+        }
+    }
+
+    // 트래픽 가중치 글로벌 변수
+    let trafficWeights = {
+        userCtx1: 70,
+        userCtx2: 30,
+        movieCtx1: 30,
+        movieCtx2: 70,
+        bookingCtx1: 50,
+        bookingCtx2: 50
+    };
+
+    // VirtualService 설정 로드
+    async function loadVirtualServiceConfig() {
+        try {
+            const response = await fetch('/traffic-weights');
+            const weights = await response.json();
+            
+            if (weights) {
+                // 사용자 서비스
+                trafficWeights.userCtx1 = weights.UserServiceCtx1Weight || 70;
+                trafficWeights.userCtx2 = weights.UserServiceCtx2Weight || 30;
+                document.getElementById('vs-ratio').textContent = `${trafficWeights.userCtx1}% : ${trafficWeights.userCtx2}%`;
+                
+                // 영화 서비스
+                trafficWeights.movieCtx1 = weights.MovieServiceCtx1Weight || 30;
+                trafficWeights.movieCtx2 = weights.MovieServiceCtx2Weight || 70;
+                document.getElementById('movie-vs-ratio').textContent = `${trafficWeights.movieCtx1}% : ${trafficWeights.movieCtx2}%`;
+                
+                // 예약 서비스
+                trafficWeights.bookingCtx1 = weights.BookingServiceCtx1Weight || 50;
+                trafficWeights.bookingCtx2 = weights.BookingServiceCtx2Weight || 50;
+                document.getElementById('booking-vs-ratio').textContent = `${trafficWeights.bookingCtx1}% : ${trafficWeights.bookingCtx2}%`;
+                
+                console.log('트래픽 가중치 로드됨:', weights);
+            }
+        } catch (error) {
+            console.log('트래픽 가중치 로드 실패, 기본값 사용:', error);
+            // 기본값 유지
+        }
+    }
+    
+    // 초기 데이터 설정 (한 번만 실행)
+    let dataInitialized = false;
+    let initializationPromise = null;
+    
+    async function initializeData() {
+        // 이미 초기화되었거나 진행 중이면 무시
+        if (dataInitialized || initializationPromise) {
+            if (initializationPromise) {
+                await initializationPromise;
+            }
+            return;
+        }
+        
+        // 초기화 작업을 Promise로 저장하여 중복 호출 방지
+        initializationPromise = performInitialization();
+        await initializationPromise;
+        initializationPromise = null;
+    }
+    
+    async function performInitialization() {
+        try {
+            // 기존 사용자 데이터 확인
+            const usersResponse = await fetch('/users/');
+            const existingUsers = await usersResponse.json();
+            
+            // 기존 영화 데이터 확인
+            const moviesResponse = await fetch('/movies/');
+            const existingMovies = await moviesResponse.json();
+            
+            // 이미 데이터가 있으면 초기화 완료로 표시하고 종료
+            if (existingUsers.length >= 3 && existingMovies.length >= 3) {
+                console.log('기존 데이터가 충분히 있어 초기화를 건너뜁니다.');
+                dataInitialized = true;
+                return;
+            }
+            
+            console.log('초기 데이터를 생성합니다...');
+            
+            const users = [
+                { name: '홍길동', email: 'hong@example.com' },
+                { name: '이순신', email: 'sunshin@example.com' },
+                { name: '김유신', email: 'yusin@example.com' }
+            ];
+            
+            const movies = [
+                { title: '어벤져스', genre: '액션', year: 2019 },
+                { title: '겨울왕국', genre: '애니메이션', year: 2019 },
+                { title: '기생충', genre: '드라마', year: 2019 }
+            ];
+        
+            // 사용자 데이터가 부족한 경우에만 추가
+            const usersToCreate = users.slice(existingUsers.length);
+            const moviesToCreate = movies.slice(existingMovies.length);
+            
+            // 병렬로 데이터 생성
+            await Promise.all([
+                ...usersToCreate.map(user => 
+                    fetch('/users/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(user)
+                    }).catch(err => console.log('사용자 생성 오류:', err))
+                ),
+                ...moviesToCreate.map(movie => 
+                    fetch('/movies/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(movie)
+                    }).catch(err => console.log('영화 생성 오류:', err))
+                )
+            ]);
+            
+            console.log('초기 데이터 생성 완료');
+            dataInitialized = true;
+        } catch (error) {
+            console.log('데이터 초기화 중 오류:', error);
+            // 오류가 발생해도 dataInitialized를 true로 설정하여 무한 재시도 방지
+            dataInitialized = true;
+        }
+    }
+    
+    async function loadUsers() {
+        try {
+            console.log('Loading users via Istio VirtualService');
+            const response = await fetch('/users/');
+            const users = await response.json();
+            currentUsers = users;
+            
+            // 실제 Istio 라우팅 결과 추적
+            const routedCluster = response.headers.get('X-Service-Cluster');
+            const podName = response.headers.get('X-Pod-Name');
+            const serviceName = response.headers.get('X-Service-Name');
+            
+            console.log(`실제 라우팅 결과 - 서비스: ${serviceName}, 클러스터: ${routedCluster}, 파드: ${podName}`);
+            
+            if (routedCluster) {
+                updateTrafficVisualization('user', routedCluster);
+            }
+            
+            displayUsers(users);
+        } catch (error) {
+            console.error('사용자 로딩 실패:', error);
+            document.getElementById('users').innerHTML = '<p style="color: red;">사용자 데이터를 불러올 수 없습니다.</p>';
+        }
+    }
+
+    // 실제 Istio 라우팅 추적 (시뮬레이션 제거)
+    // 이제 실제 응답 헤더에서 라우팅 정보를 가져옴
+
+    // 트래픽 시각화 업데이트
+    function updateTrafficVisualization(service, cluster) {
+        if (service === 'user') {
+            // 신호등 기록 업데이트 (최대 16개)
+            userLightHistory.push(cluster);
+            if (userLightHistory.length > 16) {
+                userLightHistory.shift();
+            }
+            
+            // 트래픽 기록 업데이트 (최대 100개)
+            userTrafficHistory.push(cluster);
+            if (userTrafficHistory.length > 100) {
+                userTrafficHistory.shift();
+            }
+            
+            // 신호등 업데이트
+            updateTrafficLights('user');
+            
+            // 실제 비율 업데이트
+            updateActualRatio('user');
+        } else if (service === 'movie') {
+            // 영화 서비스 트래픽 처리
+            movieLightHistory.push(cluster);
+            if (movieLightHistory.length > 16) {
+                movieLightHistory.shift();
+            }
+            
+            movieTrafficHistory.push(cluster);
+            if (movieTrafficHistory.length > 100) {
+                movieTrafficHistory.shift();
+            }
+            
+            updateTrafficLights('movie');
+            updateActualRatio('movie');
+        } else if (service === 'booking') {
+            // 예약 서비스 트래픽 처리
+            bookingLightHistory.push(cluster);
+            if (bookingLightHistory.length > 16) {
+                bookingLightHistory.shift();
+            }
+            
+            bookingTrafficHistory.push(cluster);
+            if (bookingTrafficHistory.length > 100) {
+                bookingTrafficHistory.shift();
+            }
+            
+            updateTrafficLights('booking');
+            updateActualRatio('booking');
+        }
+    }
+
+    // 신호등 상태 업데이트
+    function updateTrafficLights(service) {
+        let lightHistory, prefix;
+        
+        if (service === 'user') {
+            lightHistory = userLightHistory;
+            prefix = '';
+        } else if (service === 'movie') {
+            lightHistory = movieLightHistory;
+            prefix = 'movie-';
+        } else if (service === 'booking') {
+            lightHistory = bookingLightHistory;
+            prefix = 'booking-';
+        }
+        
+        // 해당 서비스의 모든 신호등 초기화
+        for (let i = 0; i < 16; i++) {
+            const ctx1Light = document.getElementById(`${prefix}ctx1-light-${i}`);
+            const ctx2Light = document.getElementById(`${prefix}ctx2-light-${i}`);
+            if (ctx1Light && ctx2Light) {
+                ctx1Light.className = 'traffic-light';
+                ctx2Light.className = 'traffic-light';
+            }
+        }
+        
+        // 기록된 트래픽에 따라 신호등 업데이트
+        lightHistory.forEach((cluster, index) => {
+            const ctx1Light = document.getElementById(`${prefix}ctx1-light-${index}`);
+            const ctx2Light = document.getElementById(`${prefix}ctx2-light-${index}`);
+            
+            if (ctx1Light && ctx2Light) {
+                if (cluster === 'ctx1') {
+                    ctx1Light.className = 'traffic-light green';
+                    ctx2Light.className = 'traffic-light red';
+                } else {
+                    ctx1Light.className = 'traffic-light red';
+                    ctx2Light.className = 'traffic-light green';
+                }
+            }
+        });
+    }
+
+    // 실제 트래픽 비율 업데이트
+    function updateActualRatio(service) {
+        let trafficHistory, elementId;
+        
+        if (service === 'user') {
+            trafficHistory = userTrafficHistory;
+            elementId = 'actual-ratio';
+        } else if (service === 'movie') {
+            trafficHistory = movieTrafficHistory;
+            elementId = 'movie-actual-ratio';
+        } else if (service === 'booking') {
+            trafficHistory = bookingTrafficHistory;
+            elementId = 'booking-actual-ratio';
+        }
+        
+        if (trafficHistory.length === 0) return;
+        
+        const ctx1Count = trafficHistory.filter(cluster => cluster === 'ctx1').length;
+        const ctx2Count = trafficHistory.length - ctx1Count;
+        
+        const ctx1Percentage = Math.round((ctx1Count / trafficHistory.length) * 100);
+        const ctx2Percentage = 100 - ctx1Percentage;
+        
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = `${ctx1Percentage}% : ${ctx2Percentage}%`;
+        }
+    }
+    
+    async function loadMovies() {
+        try {
+            console.log('Loading movies via Istio VirtualService');
+            const response = await fetch('/movies/');
+            const movies = await response.json();
+            currentMovies = movies;
+            
+            // 실제 Istio 라우팅 결과 추적
+            const routedCluster = response.headers.get('X-Service-Cluster');
+            const podName = response.headers.get('X-Pod-Name');
+            const serviceName = response.headers.get('X-Service-Name');
+            
+            console.log(`실제 라우팅 결과 - 서비스: ${serviceName}, 클러스터: ${routedCluster}, 파드: ${podName}`);
+            
+            if (routedCluster) {
+                updateTrafficVisualization('movie', routedCluster);
+            }
+            
+            displayMovies(movies);
+        } catch (error) {
+            console.error('영화 로딩 실패:', error);
+            document.getElementById('movies').innerHTML = '<p style="color: red;">영화 데이터를 불러올 수 없습니다.</p>';
+        }
+    }
+    
+    async function loadBookings() {
+        try {
+            console.log('Loading bookings via Istio VirtualService');
+            const response = await fetch('/bookings/');
+            const bookings = await response.json();
+            currentBookings = bookings;
+            
+            // 실제 Istio 라우팅 결과 추적
+            const routedCluster = response.headers.get('X-Service-Cluster');
+            const podName = response.headers.get('X-Pod-Name');
+            const serviceName = response.headers.get('X-Service-Name');
+            
+            console.log(`실제 라우팅 결과 - 서비스: ${serviceName}, 클러스터: ${routedCluster}, 파드: ${podName}`);
+            
+            if (routedCluster) {
+                updateTrafficVisualization('booking', routedCluster);
+            }
+            
+            displayBookings(bookings);
+        } catch (error) {
+            console.error('예약 로딩 실패:', error);
+            document.getElementById('bookings').innerHTML = '<p style="color: red;">예약 데이터를 불러올 수 없습니다.</p>';
+        }
+    }
+    
+    async function loadDeploymentStatus() {
+        try {
+            const response = await fetch('/deployment-status');
+            const deployments = await response.json();
+            displayDeploymentStatus(deployments);
+        } catch (error) {
+            console.error('배포 상태 로딩 실패:', error);
+            document.getElementById('deployment-status').innerHTML = '<p style="color: red;">배포 상태를 불러올 수 없습니다.</p>';
+        }
+    }
+    
+    
+    function displayUsers(users) {
+        const container = document.getElementById('users');
+        if (!users || users.length === 0) {
+            container.innerHTML = '<p>등록된 사용자가 없습니다.</p>';
+            return;
+        }
+        
+        container.innerHTML = users.map(user => `
+            <div class="user-item">
+                <div class="user-name">${user.name}</div>
+                <div class="user-email">${user.email}</div>
+            </div>
+        `).join('');
+    }
+    
+    function displayMovies(movies) {
+        const container = document.getElementById('movies');
+        if (!movies || movies.length === 0) {
+            container.innerHTML = '<p>등록된 영화가 없습니다.</p>';
+            return;
+        }
+        
+        container.innerHTML = movies.map(movie => `
+            <div class="movie-item">
+                <div class="movie-title">${movie.title}</div>
+                <div class="movie-details">${movie.genre} | ${movie.year}년</div>
+            </div>
+        `).join('');
+    }
+    
+    function displayBookings(bookings) {
+        const container = document.getElementById('bookings');
+        if (!bookings || bookings.length === 0) {
+            container.innerHTML = '<p>등록된 예약이 없습니다.</p>';
+            return;
+        }
+        
+        container.innerHTML = bookings.map(booking => `
+            <div class="booking-item">
+                <div class="booking-info">예약 ID: ${booking.id}</div>
+                <div class="booking-details">사용자: ${booking.userId} | 영화: ${booking.movieId} | 좌석: ${booking.seats}개</div>
+            </div>
+        `).join('');
+    }
+    
+    function displayDeploymentStatus(deployments) {
+        const container = document.getElementById('deployment-status');
+        if (!deployments || deployments.length === 0) {
+            container.innerHTML = '<p>배포 정보를 불러올 수 없습니다.</p>';
+            return;
+        }
+        
+        container.innerHTML = deployments.map(deployment => {
+            let statusClass = 'status-unknown';
+            if (deployment.status === 'Running') statusClass = 'status-running';
+            else if (deployment.status === 'Pending') statusClass = 'status-pending';
+            else if (deployment.status === 'Failed') statusClass = 'status-failed';
+            
+            return `
+                <div class="deployment-item">
+                    <div class="deployment-info">
+                        <span class="deployment-icon">${deployment.icon}</span>
+                        <span>${deployment.name}</span>
+                        <span style="color: #666; font-size: 0.9em;">(${deployment.cluster}:${deployment.port})</span>
+                    </div>
+                    <span class="deployment-status ${statusClass}">${deployment.status}</span>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function startPeriodicUpdates() {
+        // 배포 상태를 주기적으로 업데이트 (30초마다)
+        setInterval(() => {
+            loadDeploymentStatus();
+        }, 30000);
+    }
+
+    // 배포 상태 로드 함수
+    async function loadDeploymentStatus() {
+        try {
+            const response = await fetch('/deployment-status');
+            const deployments = await response.json();
+            renderDeploymentStatus(deployments);
+        } catch (error) {
+            console.error('Error loading deployment status:', error);
+            document.getElementById('deployment-status').innerHTML = 
+                '<div class="error-message">배포 상태를 로드할 수 없습니다</div>';
+        }
+    }
+
+    // 배포 상태 렌더링 함수
+    function renderDeploymentStatus(deployments) {
+        const container = document.getElementById('deployment-status');
+        
+        // 클러스터별로 배포 정보 그룹화
+        const clusterGroups = {
+            'ctx1': {
+                name: 'CTX1',
+                color: '#4299e1',
+                services: [],
+                isStatic: false
+            },
+            'ctx2': {
+                name: 'CTX2',
+                color: '#ed8936', 
+                services: [],
+                isStatic: true
+            }
+        };
+        
+        deployments.forEach(deployment => {
+            if (clusterGroups[deployment.cluster]) {
+                clusterGroups[deployment.cluster].services.push(deployment);
+            }
+        });
+        
+        let html = '<div class="deployment-overview">';
+        
+        Object.keys(clusterGroups).forEach(clusterId => {
+            const cluster = clusterGroups[clusterId];
+            if (cluster.services.length === 0) return;
+            
+            const staticClass = cluster.isStatic ? 'static-data' : '';
+            html += `
+                <div class="cluster-deployment ${staticClass}">
+                    <div class="cluster-header" style="border-left: 4px solid ${cluster.color}">
+                        <h3>${cluster.name}</h3>
+                        <span class="cluster-status">활성 ${cluster.services.length}개 서비스</span>
+                    </div>
+                    <div class="services-grid">
+            `;
+            
+            cluster.services.forEach(service => {
+                const statusClass = getStatusClass(service.status);
+                html += `
+                    <div class="service-card ${statusClass}">
+                        <div class="service-header">
+                            <span class="service-icon">${service.icon}</span>
+                            <span class="service-name">${service.service}</span>
+                            <span class="service-status ${statusClass}">${service.status}</span>
+                        </div>
+                        <div class="service-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Pod:</span>
+                                <span class="detail-value">${service.podName}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Node:</span>
+                                <span class="detail-value">${service.nodeName}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Port:</span>
+                                <span class="detail-value">${service.port}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">최종 확인:</span>
+                                <span class="detail-value">${service.lastChecked}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function getStatusClass(status) {
+        switch (status) {
+            case 'Running': return 'status-running';
+            case 'Pending': return 'status-pending';
+            case 'Failed': return 'status-failed';
+            case 'Not Ready': return 'status-not-ready';
+            default: return 'status-unknown';
+        }
+    }
+

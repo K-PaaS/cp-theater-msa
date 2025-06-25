@@ -1,0 +1,113 @@
+# Circuit Breaker 교육용 DestinationRule 설정
+# 장애 발생 시 자동 차단 및 복구 시연
+
+---
+# User Service Circuit Breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: user-service-circuit-breaker
+  namespace: theater-msa
+spec:
+  host: user-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 10
+      http:
+        http1MaxPendingRequests: 10
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+        maxRetries: 3
+    outlierDetection:
+      consecutiveGatewayErrors: 2
+      consecutive5xxErrors: 2
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+  subsets:
+  - name: ctx1
+    labels:
+      cluster: ctx1
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 5
+        http:
+          http1MaxPendingRequests: 5
+          maxRequestsPerConnection: 1
+  - name: ctx2
+    labels:
+      cluster: ctx2
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 5
+        http:
+          http1MaxPendingRequests: 5
+          maxRequestsPerConnection: 1
+
+---
+# Movie Service Circuit Breaker (더 민감한 설정)
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: movie-service-circuit-breaker
+  namespace: theater-msa
+spec:
+  host: movie-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 8
+      http:
+        http1MaxPendingRequests: 8
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 2
+        maxRetries: 2
+    outlierDetection:
+      consecutiveGatewayErrors: 2
+      consecutive5xxErrors: 2
+      interval: 20s
+      baseEjectionTime: 20s
+      maxEjectionPercent: 70
+  subsets:
+  - name: ctx1
+    labels:
+      cluster: ctx1
+  - name: ctx2
+    labels:
+      cluster: ctx2
+
+---
+# Booking Service Circuit Breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: booking-service-circuit-breaker
+  namespace: theater-msa
+spec:
+  host: booking-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 15
+      http:
+        http1MaxPendingRequests: 15
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 3
+        maxRetries: 3
+    outlierDetection:
+      consecutiveGatewayErrors: 4
+      consecutive5xxErrors: 4
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+  subsets:
+  - name: ctx1
+    labels:
+      cluster: ctx1
+  - name: ctx2
+    labels:
+      cluster: ctx2

@@ -1,0 +1,16 @@
+# Redis Service for CTX1 (headless service for multi-cluster discovery)
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: theater-msa
+  labels:
+    app: redis
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+  # No selector - this will be managed by Istio multi-cluster service discovery

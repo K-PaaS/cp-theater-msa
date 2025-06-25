@@ -1,0 +1,60 @@
+# CTX1 전용 Booking Service 배포
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service-ctx1
+  namespace: theater-msa
+  labels:
+    app: booking-service
+    tier: backend
+    cluster: ctx1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-service
+      cluster: ctx1
+  template:
+    metadata:
+      labels:
+        app: booking-service
+        tier: backend
+        cluster: ctx1
+    spec:
+      serviceAccountName: theater-msa-sa
+      containers:
+      - name: booking-service
+        image: theater-msa/booking-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8083
+        env:
+        - name: CLUSTER_NAME
+          value: "ctx1"
+        envFrom:
+        - configMapRef:
+            name: theater-config
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  namespace: theater-msa
+  labels:
+    app: booking-service
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8083
+    targetPort: 8083
+    protocol: TCP
+  selector:
+    app: booking-service
