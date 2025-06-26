@@ -459,16 +459,7 @@ run_test() {
         echo "$response" | grep -o "HTTP_[0-9]*_[0-9.]*s" || echo "연결 실패"
         sleep 1
     done
-    
-    echo ""
-    info "🔍 Circuit Breaker 전용 테스트 (x-circuit-test 헤더):"
-    for i in {1..3}; do
-        printf "  고집중 오류 테스트 $i: "
-        response=$(curl -k -s -w "HTTP_%{http_code}_%{time_total}s" -H "x-circuit-test: true" "$APP_URL/users/" 2>&1)
-        echo "$response" | grep -o "HTTP_[0-9]*_[0-9.]*s" || echo "연결 실패"
-        sleep 1
-    done
-    
+        
     echo ""
     warn "⏱️  응답 시간이 3초 이상이면 지연 장애가 활성화된 상태입니다."
     warn "🚨 HTTP_500 응답이 보이면 오류 장애가 활성화된 상태입니다."
