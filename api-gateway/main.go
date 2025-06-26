@@ -118,16 +118,31 @@ func getVirtualServiceWeights() TrafficWeight {
 
 	// User Service VirtualService 조회
 	if userVS, err := istioClient.NetworkingV1().VirtualServices("theater-msa").Get(context.TODO(), "user-service-vs", metav1.GetOptions{}); err == nil {
-		if len(userVS.Spec.Http) > 1 && len(userVS.Spec.Http[1].Route) >= 2 {
-			// 카나리가 아닌 일반 라우팅 규칙에서 가중치 추출
-			for _, route := range userVS.Spec.Http[1].Route {
-				if route.Destination.Subset == "ctx1" {
-					weights.UserServiceCtx1Weight = int(route.Weight)
-				} else if route.Destination.Subset == "ctx2" {
-					weights.UserServiceCtx2Weight = int(route.Weight)
+		if len(userVS.Spec.Http) > 1 {
+			routes := userVS.Spec.Http[1].Route
+			if len(routes) == 1 {
+				// Block 상태: 하나의 클러스터만 100%
+				if routes[0].Destination.Subset == "ctx1" {
+					weights.UserServiceCtx1Weight = 100
+					weights.UserServiceCtx2Weight = 0
+				} else if routes[0].Destination.Subset == "ctx2" {
+					weights.UserServiceCtx1Weight = 0
+					weights.UserServiceCtx2Weight = 100
 				}
+				log.Printf("User service block mode detected: ctx1=%d, ctx2=%d", weights.UserServiceCtx1Weight, weights.UserServiceCtx2Weight)
+			} else if len(routes) >= 2 {
+				// 정상 분산 상태: 여러 클러스터로 가중치 분산
+				weights.UserServiceCtx1Weight = 0  // 초기화
+				weights.UserServiceCtx2Weight = 0  // 초기화
+				for _, route := range routes {
+					if route.Destination.Subset == "ctx1" {
+						weights.UserServiceCtx1Weight = int(route.Weight)
+					} else if route.Destination.Subset == "ctx2" {
+						weights.UserServiceCtx2Weight = int(route.Weight)
+					}
+				}
+				log.Printf("User service weights from VirtualService: ctx1=%d, ctx2=%d", weights.UserServiceCtx1Weight, weights.UserServiceCtx2Weight)
 			}
-			log.Printf("User service weights from VirtualService: ctx1=%d, ctx2=%d", weights.UserServiceCtx1Weight, weights.UserServiceCtx2Weight)
 		}
 	} else {
 		log.Printf("Failed to get user-service-vs: %v", err)
@@ -135,15 +150,31 @@ func getVirtualServiceWeights() TrafficWeight {
 
 	// Movie Service VirtualService 조회
 	if movieVS, err := istioClient.NetworkingV1().VirtualServices("theater-msa").Get(context.TODO(), "movie-service-vs", metav1.GetOptions{}); err == nil {
-		if len(movieVS.Spec.Http) > 1 && len(movieVS.Spec.Http[1].Route) >= 2 {
-			for _, route := range movieVS.Spec.Http[1].Route {
-				if route.Destination.Subset == "ctx1" {
-					weights.MovieServiceCtx1Weight = int(route.Weight)
-				} else if route.Destination.Subset == "ctx2" {
-					weights.MovieServiceCtx2Weight = int(route.Weight)
+		if len(movieVS.Spec.Http) > 1 {
+			routes := movieVS.Spec.Http[1].Route
+			if len(routes) == 1 {
+				// Block 상태: 하나의 클러스터만 100%
+				if routes[0].Destination.Subset == "ctx1" {
+					weights.MovieServiceCtx1Weight = 100
+					weights.MovieServiceCtx2Weight = 0
+				} else if routes[0].Destination.Subset == "ctx2" {
+					weights.MovieServiceCtx1Weight = 0
+					weights.MovieServiceCtx2Weight = 100
 				}
+				log.Printf("Movie service block mode detected: ctx1=%d, ctx2=%d", weights.MovieServiceCtx1Weight, weights.MovieServiceCtx2Weight)
+			} else if len(routes) >= 2 {
+				// 정상 분산 상태: 여러 클러스터로 가중치 분산
+				weights.MovieServiceCtx1Weight = 0  // 초기화
+				weights.MovieServiceCtx2Weight = 0  // 초기화
+				for _, route := range routes {
+					if route.Destination.Subset == "ctx1" {
+						weights.MovieServiceCtx1Weight = int(route.Weight)
+					} else if route.Destination.Subset == "ctx2" {
+						weights.MovieServiceCtx2Weight = int(route.Weight)
+					}
+				}
+				log.Printf("Movie service weights from VirtualService: ctx1=%d, ctx2=%d", weights.MovieServiceCtx1Weight, weights.MovieServiceCtx2Weight)
 			}
-			log.Printf("Movie service weights from VirtualService: ctx1=%d, ctx2=%d", weights.MovieServiceCtx1Weight, weights.MovieServiceCtx2Weight)
 		}
 	} else {
 		log.Printf("Failed to get movie-service-vs: %v", err)
@@ -151,15 +182,31 @@ func getVirtualServiceWeights() TrafficWeight {
 
 	// Booking Service VirtualService 조회
 	if bookingVS, err := istioClient.NetworkingV1().VirtualServices("theater-msa").Get(context.TODO(), "booking-service-vs", metav1.GetOptions{}); err == nil {
-		if len(bookingVS.Spec.Http) > 1 && len(bookingVS.Spec.Http[1].Route) >= 2 {
-			for _, route := range bookingVS.Spec.Http[1].Route {
-				if route.Destination.Subset == "ctx1" {
-					weights.BookingServiceCtx1Weight = int(route.Weight)
-				} else if route.Destination.Subset == "ctx2" {
-					weights.BookingServiceCtx2Weight = int(route.Weight)
+		if len(bookingVS.Spec.Http) > 1 {
+			routes := bookingVS.Spec.Http[1].Route
+			if len(routes) == 1 {
+				// Block 상태: 하나의 클러스터만 100%
+				if routes[0].Destination.Subset == "ctx1" {
+					weights.BookingServiceCtx1Weight = 100
+					weights.BookingServiceCtx2Weight = 0
+				} else if routes[0].Destination.Subset == "ctx2" {
+					weights.BookingServiceCtx1Weight = 0
+					weights.BookingServiceCtx2Weight = 100
 				}
+				log.Printf("Booking service block mode detected: ctx1=%d, ctx2=%d", weights.BookingServiceCtx1Weight, weights.BookingServiceCtx2Weight)
+			} else if len(routes) >= 2 {
+				// 정상 분산 상태: 여러 클러스터로 가중치 분산
+				weights.BookingServiceCtx1Weight = 0  // 초기화
+				weights.BookingServiceCtx2Weight = 0  // 초기화
+				for _, route := range routes {
+					if route.Destination.Subset == "ctx1" {
+						weights.BookingServiceCtx1Weight = int(route.Weight)
+					} else if route.Destination.Subset == "ctx2" {
+						weights.BookingServiceCtx2Weight = int(route.Weight)
+					}
+				}
+				log.Printf("Booking service weights from VirtualService: ctx1=%d, ctx2=%d", weights.BookingServiceCtx1Weight, weights.BookingServiceCtx2Weight)
 			}
-			log.Printf("Booking service weights from VirtualService: ctx1=%d, ctx2=%d", weights.BookingServiceCtx1Weight, weights.BookingServiceCtx2Weight)
 		}
 	} else {
 		log.Printf("Failed to get booking-service-vs: %v", err)
