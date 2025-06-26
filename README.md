@@ -9,7 +9,7 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │          Istio DestinationRule/VirtualService 기반       │
-│             멀티클라우드 서비스메시 트래픽 관리                  │
+│             멀티클라우드 서비스메시 트래픽 관리            │
 ├─────────────────────────────────────────────────────────┤
 │   NaverCloud Platform      │   NHN Cloud NKS            │
 │   (Istio Pre-installed)    │   (Istio Pre-installed)    │
@@ -244,12 +244,6 @@ kubectl get pods -n theater-msa -o wide --show-labels --context=ctx2
 
 # VirtualService 가중치 설정 확인
 kubectl get vs -n theater-msa -o yaml --context=ctx1 | grep -A 3 weight
-
-# 실제 트래픽 분산 테스트
-for i in {1..10}; do
-  curl -s http://theater.$DOMAIN/users/ | head -1
-  sleep 1
-done
 ```
 
 ### 4. 배포 상태 확인
